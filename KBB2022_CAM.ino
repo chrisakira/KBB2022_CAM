@@ -8,8 +8,6 @@
 #include "src/parsebytes.h"
 #include "time.h"
 #include <ESPmDNS.h>
-#include "soc/soc.h"
-#include "soc/rtc_cntl_reg.h"
 
 
 /* This sketch is a extension/expansion/reork of the 'official' ESP32 Camera example
@@ -35,7 +33,7 @@
  *
  * By default this sketch will assume an AI-THINKER ESP-CAM and create
  * an accesspoint called "ESP32-CAM-CONNECT" (password: "InsecurePassword")
- * 
+ *
  */
 
 // Primary config, or defaults.
@@ -335,11 +333,11 @@ void StartCamera() {
     config.pin_sscb_scl = SIOC_GPIO_NUM;
     config.pin_pwdn = PWDN_GPIO_NUM;
     config.pin_reset = RESET_GPIO_NUM;
-    config.xclk_freq_hz = xclk * 1000000;
+    config.xclk_freq_hz = 25 * 1000000;
     config.pixel_format = PIXFORMAT_JPEG;
     // Low(ish) default framesize and quality
-    config.frame_size = FRAMESIZE_SVGA;
-    config.jpeg_quality = 12;
+    config.frame_size = FRAMESIZE_HD;
+    config.jpeg_quality = 10;
     config.fb_location = CAMERA_FB_IN_PSRAM;
     config.fb_count = 2;
     config.grab_mode = CAMERA_GRAB_LATEST;
@@ -417,12 +415,12 @@ void StartCamera() {
         * https://github.com/espressif/esp32-camera/blob/master/driver/include/sensor.h#L149
         */
 
-        //s->set_framesize(s, FRAMESIZE_SVGA); // FRAMESIZE_[QQVGA|HQVGA|QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA|QXGA(ov3660)]);
-        //s->set_quality(s, val);       // 10 to 63
+        s->set_framesize(s, FRAMESIZE_VGA); // FRAMESIZE_[QQVGA|HQVGA|QVGA|CIF|VGA|SVGA|XGA|SXGA|UXGA|QXGA(ov3660)]);
+        s->set_quality(s, 40);       // 10 to 63
         //s->set_brightness(s, 0);      // -2 to 2
         //s->set_contrast(s, 0);        // -2 to 2
         //s->set_saturation(s, 0);      // -2 to 2
-        //s->set_special_effect(s, 0);  // 0 to 6 (0 - No Effect, 1 - Negative, 2 - Grayscale, 3 - Red Tint, 4 - Green Tint, 5 - Blue Tint, 6 - Sepia)
+        s->set_special_effect(s, 2);  // 0 to 6 (0 - No Effect, 1 - Negative, 2 - Grayscale, 3 - Red Tint, 4 - Green Tint, 5 - Blue Tint, 6 - Sepia)
         //s->set_whitebal(s, 1);        // aka 'awb' in the UI; 0 = disable , 1 = enable
         //s->set_awb_gain(s, 1);        // 0 = disable , 1 = enable
         //s->set_wb_mode(s, 0);         // 0 to 4 - if awb_gain enabled (0 - Auto, 1 - Sunny, 2 - Cloudy, 3 - Office, 4 - Home)
@@ -746,10 +744,6 @@ void setup() {
         }
         Serial.println("mDNS responder started");
     }
-
-    //MDNS Config -- note that if OTA is NOT enabled this needs prior steps!
-    MDNS.addService("http", "tcp", 80);
-    Serial.println("Added HTTP service to MDNS server");
 
     // Set time via NTP server when enabled
     if (haveTime) {
